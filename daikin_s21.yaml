@@ -1,3 +1,13 @@
+# file __init__.py để hỗ trợ dùng external_components chính thức cho ESPHome
+# file __init__.py bạn cần thêm vào thư mục custom_components/daikin_s21/ để hỗ trợ external_components trong ESPHome và cho phép sử dụng platform: daikin_s21 trong YAML
+external_components:
+  - source:
+      type: local
+      path: ./custom_components
+    components: [daikin_s21]
+
+
+    
 climate:
   - platform: daikin_s21
     uart_id: uart1
