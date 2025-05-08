@@ -1,0 +1,12 @@
+climate:
+  - platform: daikin_s21
+    uart_id: uart1
+    room_sensor: room_temp
+    outdoor_sensor: outdoor_temp
+    coil_sensor: coil_temp
+    powerful_sensor: powerful_mode
+    comfort_sensor: comfort_mode
+    quiet_sensor: quiet_mode
+    streamer_sensor: streamer_status
+    body_sensor: body_sensor_status
+    led_sensor: led_status
