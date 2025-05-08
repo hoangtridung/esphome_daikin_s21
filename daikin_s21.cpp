@@ -117,9 +117,78 @@ void DaikinS21::send_swing_command_() {
   ESP_LOGD(TAG, "Sent swing command: vert=%d, horiz=%d, payload=0x%02X", swing_vertical_, swing_horizontal_, buf[3]);
 }
 
+// update_internal_state_from_response_() để xử lý đầy đủ các gói:
+
+// 'G1': trạng thái cơ bản (mode, nhiệt độ, quạt)
+// 'G6': các chế độ đặc biệt (powerful, comfort, quiet, streamer, sensor, led)
+// 'Sx': cảm biến nhiệt độ (room, outdoor, coil)
+
+
+
 void DaikinS21::update_internal_state_from_response_(const uint8_t *data, size_t length) {
-  // TODO: thêm xử lý các gói G1, G6, Sx tại đây như đã trình bày ở các bước trước
+  if (length < 6 || data[0] != 0x02 || data[length - 1] != 0x03) {
+    ESP_LOGW(TAG, "Invalid frame or length");
+    return;
+  }
+
+  char cmd0 = data[1];
+  char cmd1 = data[2];
+  const uint8_t *payload = &data[3];
+  size_t payload_len = length - 5;
+
+  if (cmd0 == 'G' && cmd1 == '1' && payload_len >= 4) {
+    this->mode = [payload]() {
+      switch (payload[1] & 0x7) {
+        case 0: return climate::CLIMATE_MODE_AUTO;
+        case 2: return climate::CLIMATE_MODE_DRY;
+        case 3: return climate::CLIMATE_MODE_COOL;
+        case 4: return climate::CLIMATE_MODE_HEAT;
+        case 6: return climate::CLIMATE_MODE_FAN_ONLY;
+        default: return climate::CLIMATE_MODE_OFF;
+      }
+    }();
+
+    this->target_temperature = 18.0f + 0.5f * (static_cast<int>(payload[2]) - '@');
+
+    this->fan_mode = [payload]() {
+      switch (payload[3]) {
+        case 'A': return climate::CLIMATE_FAN_AUTO;
+        case '3': return climate::CLIMATE_FAN_LOW;
+        case '4': return climate::CLIMATE_FAN_MEDIUM;
+        case '5': return climate::CLIMATE_FAN_HIGH;
+        default:  return climate::CLIMATE_FAN_AUTO;
+      }
+    }();
+
+    publish_state();
+  } else if (cmd0 == 'G' && cmd1 == '6' && payload_len >= 4) {
+    bool powerful = payload[0] & 0x02;
+    bool comfort  = payload[0] & 0x40;
+    bool quiet    = payload[0] & 0x80;
+    bool streamer = payload[1] & 0x80;
+    bool sensor   = payload[3] & 0x08;
+    bool led      = (payload[3] & 0x0C) != 0x0C;
+
+    if (powerful_sensor_ != nullptr) powerful_sensor_->publish_state(powerful);
+    if (comfort_sensor_ != nullptr)  comfort_sensor_->publish_state(comfort);
+    if (quiet_sensor_ != nullptr)    quiet_sensor_->publish_state(quiet);
+    if (streamer_sensor_ != nullptr) streamer_sensor_->publish_state(streamer);
+    if (body_sensor_ != nullptr)     body_sensor_->publish_state(sensor);
+    if (led_sensor_ != nullptr)      led_sensor_->publish_state(led);
+  } else if (cmd0 == 'S' && payload_len >= 4) {
+    float t = (payload[0] - '0') + (payload[1] - '0') * 10 + (payload[2] - '0') * 100;
+    if (payload[3] == '-') t = -t;
+    t *= 0.1f;
+    if (t > -40.0f && t < 100.0f) {
+      switch (cmd1) {
+        case 'H': if (room_sensor_) room_sensor_->publish_state(t); break;
+        case 'a': if (outdoor_sensor_) outdoor_sensor_->publish_state(t); break;
+        case 'I': if (coil_sensor_) coil_sensor_->publish_state(t); break;
+      }
+    }
+  }
 }
+
 
 }  // namespace daikin_s21
 }  // namespace esphome
