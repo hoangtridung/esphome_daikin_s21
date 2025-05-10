@@ -14,7 +14,7 @@ static DaikinS21 *make_daikin_s21(UARTComponent *uart_parent) {
 
 // Đăng ký component và climate platform tên là "daikin_s21"
 /* ESPHOME_REGISTER_COMPONENT(daikin_s21::DaikinS21, daikin_s21::make_daikin_s21)
-ESPHOME_REGISTER_CLIMATE(daikin_s21::DaikinS21, daikin_s21::make_daikin_s21)
- */
-ESPHOME_REGISTER_COMPONENT(daikin_s21::DaikinS21, daikin_s21::make_daikin_s21)
 ESPHOME_REGISTER_CLIMATE_ONLY(daikin_s21::DaikinS21, daikin_s21::make_daikin_s21)
+*/
+ESPHOME_REGISTER_COMPONENT(daikin_s21::DaikinS21, daikin_s21::make_daikin_s21)
+ESPHOME_REGISTER_CLIMATE(daikin_s21::DaikinS21, daikin_s21::make_daikin_s21)
