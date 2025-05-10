@@ -31,7 +31,7 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID], config[CONF_UART_ID])
     await cg.register_component(var, config)
     await climate.register_climate(var, config)
-    await uart.register_uart_device(var, config[CONF_UART_ID])
+    # await uart.register_uart_device(var, config[CONF_UART_ID])
 
     if "room_sensor" in config:
         sens = await cg.get_variable(config["room_sensor"])
