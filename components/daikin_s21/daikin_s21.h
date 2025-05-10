@@ -1,10 +1,10 @@
 #pragma once
 
-#include "esphome/components/climate/climate.h"
-#include "esphome/components/uart/uart.h"
-#include "esphome/components/sensor/sensor.h"
-#include "esphome/components/binary_sensor/binary_sensor.h"
-#include "esphome/core/component.h"
+#include "esphome/climate/climate.h"
+#include "esphome/uart/uart.h"
+#include "esphome/sensor/sensor.h"
+#include "esphome/binary_sensor/binary_sensor.h"
+#include "esphome/component.h"
 
 namespace esphome {
 namespace daikin_s21 {
