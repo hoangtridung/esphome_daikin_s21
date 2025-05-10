@@ -28,24 +28,28 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend({
 }).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
+    # Lấy biến UARTComponent từ ID trong YAML
     uart_var = await cg.get_variable(config[CONF_UART_ID])
-    cg.add(uart_var.set_debug(true))  # Thêm log debug cho UARTComponent
+    # Tạo instance của DaikinS21
     var = cg.new_Pvariable(config[CONF_ID], uart_var)
+
+    # Đăng ký component
     await cg.register_component(var, config)
     await climate.register_climate(var, config)
-    # await uart.register_uart_device(var, config[CONF_UART_ID])
 
+    # Ánh xạ các sensor
     if "room_sensor" in config:
-        sens = await cg.get_variable(config["room_sensor"])
-        cg.add(var.set_room_sensor(sens))
+        room_sensor = await cg.get_variable(config["room_sensor"])
+        cg.add(var.set_room_sensor(room_sensor))
     if "outdoor_sensor" in config:
-        sens = await cg.get_variable(config["outdoor_sensor"])
-        cg.add(var.set_outdoor_sensor(sens))
+        outdoor_sensor = await cg.get_variable(config["outdoor_sensor"])
+        cg.add(var.set_outdoor_sensor(outdoor_sensor))
     if "coil_sensor" in config:
-        sens = await cg.get_variable(config["coil_sensor"])
-        cg.add(var.set_coil_sensor(sens))
+        coil_sensor = await cg.get_variable(config["coil_sensor"])
+        cg.add(var.set_coil_sensor(coil_sensor))
 
+    # Ánh xạ binary_sensor
     for name in ["powerful_sensor", "comfort_sensor", "quiet_sensor", "streamer_sensor", "body_sensor", "led_sensor"]:
         if name in config:
-            bsen = await cg.get_variable(config[name])
-            cg.add(getattr(var, f"set_{name}")(bsen))
+            binary_sensor_var = await cg.get_variable(config[name])
+            cg.add(getattr(var, f"set_{name}")(binary_sensor_var))
