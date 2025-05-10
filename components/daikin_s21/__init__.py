@@ -27,8 +27,11 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend({
     cv.Optional("led_sensor"): cv.use_id(binary_sensor.BinarySensor),
 }).extend(cv.COMPONENT_SCHEMA)
 
+
+
 async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_ID], config[CONF_UART_ID])
+    # Tạo instance của DaikinS21 bằng cách ánh xạ UARTComponent
+    var = cg.new_Pvariable(config[CONF_ID], await cg.get_variable(config[CONF_UART_ID]))
     await cg.register_component(var, config)
     await climate.register_climate(var, config)
     # await uart.register_uart_device(var, config[CONF_UART_ID])
