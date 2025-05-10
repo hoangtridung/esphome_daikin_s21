@@ -11,7 +11,7 @@ namespace daikin_s21 {
 
 class DaikinS21 : public climate::Climate, public Component, public uart::UARTDevice {
  public:
-  DaikinS21(uart::UARTComponent *parent);
+  explicit DaikinS21(uart::UARTComponent *parent) : UARTDevice(parent) {}
 
   void setup() override;
   void loop() override;
