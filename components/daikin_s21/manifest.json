@@ -1,7 +1,0 @@
-{
-  "domain": "daikin_s21",
-  "name": "Daikin S21 Climate",
-  "version": "1.0.0",
-  "dependencies": ["uart"],
-  "codeowners": ["@hoangtridung"]
-}
